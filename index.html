@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treinamento LGPD — Conrad Diagnóstico por Imagem</title>
+  <style>
+    /* ============================================================
+       IDENTIDADE VISUAL CONRAD — Ajuste as cores abaixo
+       ============================================================ */
+    :root {
+      --cor-primaria:    #1B3A6B;   /* Azul escuro principal */
+      --cor-secundaria:  #2980B9;   /* Azul médio */
+      --cor-destaque:    #E8A020;   /* Dourado/laranja de destaque */
+      --cor-fundo:       #F4F7FB;   /* Fundo cinza-azulado claro */
+      --cor-branca:      #FFFFFF;
+      --cor-texto:       #2C3E50;
+      --cor-sucesso:     #27AE60;
+      --cor-erro:        #C0392B;
+      --cor-aviso:       #F39C12;
+      --fonte:           'Segoe UI', Arial, sans-serif;
+      --raio:            8px;
+      --sombra:          0 2px 12px rgba(0,0,0,0.10);
+    }
+
+    /* RESET & BASE */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--fonte);
+      background: var(--cor-fundo);
+      color: var(--cor-texto);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* HEADER */
+    .header {
+      background: var(--cor-primaria);
+      color: var(--cor-branca);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 32px;
+      gap: 20px;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-logo img {
+      height: 44px;
+      width: auto;
+      filter: brightness(0) invert(1);
+    }
+    .header-logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .header-logo-text .nome-clinica {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+    }
+    .header-logo-text .subtitulo-clinica {
+      font-size: 0.78rem;
+      opacity: 0.8;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .header-badge {
+      background: var(--cor-destaque);
+      color: #1a1a1a;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    /* BARRA DE PROGRESSO */
+    .progress-bar-container {
+      background: rgba(255,255,255,0.15);
+      height: 4px;
+    }
+    .progress-bar {
+      height: 4px;
+      background: var(--cor-destaque);
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--cor-primaria) 0%, #2471A3 100%);
+      color: var(--cor-branca);
+      text-align: center;
+      padding: 52px 32px 48px;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.25;
+    }
+    .hero p {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      max-width: 640px;
+      margin: 0 auto 28px;
+    }
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      opacity: 0.9;
+    }
+    .hero-meta-item .icon { font-size: 1.1rem; }
+
+    /* NAVEGAÇÃO DOS MÓDULOS */
+    .nav-modulos {
+      background: var(--cor-branca);
+      border-bottom: 2px solid #e0e8f0;
+      padding: 0 16px;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-modulos::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      background: none;
+      border: none;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-family: var(--fonte);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #6b7c93;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn:hover { color: var(--cor-primaria); }
+    .nav-btn.ativo {
+      color: var(--cor-primaria);
+      border-bottom-color: var(--cor-primaria);
+    }
+    .nav-btn .check {
+      display: none;
+      color: var(--cor-sucesso);
+      font-size: 0.9rem;
+    }
+    .nav-btn.concluido .check { display: inline; }
+
+    /* CONTAINER PRINCIPAL */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* MÓDULO */
+    .modulo {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .modulo.ativo { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modulo-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e0e8f0;
+    }
+    .modulo-numero {
+      background: var(--cor-primaria);
+      color: var(--cor-branca);
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .modulo-titulo-wrap h2 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--cor-primaria);
+      margin-bottom: 4px;
+    }
+    .modulo-titulo-wrap .subtitulo {
+      font-size: 0.88rem;
+      color: #6b7c93;
+    }
+
+    /* TIPOGRAFIA DO CONTEÚDO */
+    .conteudo h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cor-primaria);
+      margin: 28px 0 10px;
+      padding-left: 12px;
+      border-left: 3px solid var(--cor-destaque);
+    }
+    .conteudo p { margin-bottom: 16px; }
+    .conteudo ul, .conteudo ol {
+      margin: 0 0 16px 24px;
+    }
+    .conteudo li { margin-bottom: 8px; }
+    .conteudo strong { color: var(--cor-primaria); }
+
+    /* CAIXAS ESPECIAIS */
+    .box {
+      border-radius: var(--raio);
+      padding: 18px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .box-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+    .box-corpo { flex: 1; }
+    .box-corpo p { margin: 0; font-size: 0.95rem; }
+    .box-corpo p + p { margin-top: 8px; }
+    .box-corpo strong { display: block; margin-bottom: 4px; font-size: 1rem; }
+
+    .box-info    { background: #EBF5FB; border-left: 4px solid #2980B9; }
+    .box-atencao { background: #FEF9E7; border-left: 4px solid var(--cor-aviso); }
+    .box-perigo  { background: #FDEDEC; border-left: 4px solid var(--cor-erro); }
+    .box-dica    { background: #EAFAF1; border-left: 4px solid var(--cor-sucesso); }
+
+    /* TABELA */
+    .tabela-wrap { overflow-x: auto; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th {
+      background: var(--cor-primaria);
+      color: var(--cor-branca);
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid #e0e8f0; }
+    tr:nth-child(even) td { background: #f4f7fb; }
+    tr:hover td { background: #EBF5FB; }
+
+    /* CARDS DE EXEMPLO */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .card {
+      background: var(--cor-branca);
+      border-radius: var(--raio);
+      padding: 18px;
+      box-shadow: var(--sombra);
+      border-top: 3px solid var(--cor-secundaria);
+    }
+    .card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+    .card h4 { font-size: 0.95rem; font-weight: 700; color: var(--cor-primaria); margin-bottom: 6px; }
+    .card p { font-size: 0.87rem; color: #5d6d7e; margin: 0; }
+
+    /* LINHA DO TEMPO */
+    .timeline { margin: 20px 0; padding-left: 24px; border-left: 3px solid var(--cor-secundaria); }
+    .timeline-item { position: relative; padding: 0 0 20px 20px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 5px;
+      width: 13px;
+      height: 13px;
+      background: var(--cor-secundaria);
+      border-radius: 50%;
+      border: 2px solid var(--cor-branca);
+    }
+    .timeline-item h4 { font-size: 0.95rem; font-weight: 700; color: var(--cor-primaria); margin-bottom: 4px; }
+    .timeline-item p  { font-size: 0.88rem; color: #5d6d7e; margin: 0; }
+
+    /* QUIZ CTA */
+    .quiz-cta {
+      background: linear-gradient(135deg, var(--cor-primaria) 0%, #1a6b9a 100%);
+      color: var(--cor-branca);
+      border-radius: var(--raio);
+      padding: 36px 32px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .quiz-cta h3 { font-size: 1.4rem; margin-bottom: 10px; }
+    .quiz-cta p  { opacity: 0.9; margin-bottom: 24px; font-size: 0.95rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+    .btn-quiz {
+      display: inline-block;
+      background: var(--cor-destaque);
+      color: #1a1a1a;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 36px;
+      border-radius: 40px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .btn-quiz:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+    .quiz-nota { font-size: 0.82rem; opacity: 0.75; margin-top: 14px; }
+
+    /* NAVEGAÇÃO INFERIOR */
+    .nav-inferior {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid #e0e8f0;
+      gap: 12px;
+    }
+    .btn-nav {
+      background: var(--cor-branca);
+      border: 2px solid var(--cor-primaria);
+      color: var(--cor-primaria);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 10px 22px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--fonte);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-nav:hover { background: var(--cor-primaria); color: var(--cor-branca); }
+    .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-nav.primario { background: var(--cor-primaria); color: var(--cor-branca); }
+    .btn-nav.primario:hover { background: #152e56; }
+    .pagina-atual { font-size: 0.88rem; color: #6b7c93; }
+
+    /* FOOTER */
+    .footer {
+      background: var(--cor-primaria);
+      color: rgba(255,255,255,0.75);
+      text-align: center;
+      padding: 20px 32px;
+      font-size: 0.82rem;
+    }
+    .footer strong { color: var(--cor-branca); }
+
+    /* RESPONSIVO */
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.5rem; }
+      .header-top { padding: 12px 16px; }
+      .container { padding: 24px 16px 60px; }
+      .nav-inferior { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <img src="https://conrad.com.br/wp-content/uploads/2022/06/cropped-logositeconrad-300x62.jpg"
+           alt="Conrad Diagnóstico por Imagem"
+           onerror="this.style.display='none'">
+      <div class="header-logo-text">
+        <span class="nome-clinica">CONRAD</span>
+        <span class="subtitulo-clinica">Diagnóstico por Imagem</span>
+      </div>
+    </div>
+    <span class="header-badge">🔒 TREINAMENTO LGPD</span>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Treinamento de LGPD<br>para o Corpo Clínico</h1>
+  <p>Proteção de dados pessoais de pacientes é responsabilidade de todos. Conclua os módulos e obtenha seu certificado.</p>
+  <div class="hero-meta">
+    <span class="hero-meta-item"><span class="icon">📚</span> 6 Módulos</span>
+    <span class="hero-meta-item"><span class="icon">⏱️</span> ~2 horas</span>
+    <span class="hero-meta-item"><span class="icon">🏆</span> Certificado ao Concluir</span>
+    <span class="hero-meta-item"><span class="icon">✅</span> Quiz com 10 questões</span>
+  </div>
+</section>
+
+<!-- NAVEGAÇÃO DOS MÓDULOS -->
+<nav class="nav-modulos" id="navModulos">
+  <button class="nav-btn ativo" onclick="irPara(0)">
+    <span class="check">✓</span> Módulo 1
+  </button>
+  <button class="nav-btn" onclick="irPara(1)">
+    <span class="check">✓</span> Módulo 2
+  </button>
+  <button class="nav-btn" onclick="irPara(2)">
+    <span class="check">✓</span> Módulo 3
+  </button>
+  <button class="nav-btn" onclick="irPara(3)">
+    <span class="check">✓</span> Módulo 4
+  </button>
+  <button class="nav-btn" onclick="irPara(4)">
+    <span class="check">✓</span> Módulo 5
+  </button>
+  <button class="nav-btn" onclick="irPara(5)">
+    <span class="check">✓</span> Módulo 6
+  </button>
+  <button class="nav-btn" onclick="irPara(6)">
+    <span class="check">✓</span> 📝 Quiz
+  </button>
+</nav>
+
+<!-- ============================================================
+     CONTEÚDO
+     ============================================================ -->
+<main class="container">
+
+  <!-- ==============================
+       MÓDULO 1 — O QUE É A LGPD?
+       ============================== -->
+  <section class="modulo ativo" id="modulo-0">
+    <div class="modulo-header">
+      <div class="modulo-numero">1</div>
+      <div class="modulo-titulo-wrap">
+        <h2>O que é a LGPD?</h2>
+        <span class="subtitulo">Contexto, importância e impacto para a Conrad</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>A <strong>Lei Geral de Proteção de Dados Pessoais (LGPD)</strong> — Lei nº 13.709/2018 — é a legislação brasileira que regula o tratamento de dados pessoais por pessoas físicas e jurídicas, com o objetivo de proteger os direitos fundamentais de liberdade e privacidade.</p>
+
+      <div class="box box-info">
+        <span class="box-icon">📋</span>
+        <div class="box-corpo">
+          <strong>Lei nº 13.709/2018 — LGPD</strong>
+          <p>Vigência geral: setembro de 2020. Sanções administrativas (multas): agosto de 2021. Fiscalização: ANPD — Autoridade Nacional de Proteção de Dados.</p>
+        </div>
+      </div>
+
+      <h3>Por que a LGPD foi criada?</h3>
+      <p>Com a digitalização acelerada dos serviços, volumes cada vez maiores de dados pessoais passaram a ser coletados, armazenados e compartilhados — muitas vezes sem o conhecimento ou consentimento das pessoas. A LGPD surgiu para dar ao cidadão brasileiro controle sobre suas próprias informações.</p>
+      <p>O Brasil seguiu uma tendência global: a Europa criou o GDPR em 2018, a Califórnia criou o CCPA em 2020. A proteção de dados tornou-se um direito fundamental reconhecido internacionalmente.</p>
+
+      <h3>O que são sanções e como funcionam?</h3>
+      <p>Empresas e profissionais que violarem a LGPD podem sofrer penalidades aplicadas pela ANPD:</p>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">⚠️</div>
+          <h4>Advertência</h4>
+          <p>Com prazo para adoção de medidas corretivas.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💰</div>
+          <h4>Multa simples</h4>
+          <p>Até 2% do faturamento do grupo econômico no Brasil, limitado a R$ 50 milhões por infração.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📢</div>
+          <h4>Publicização da infração</h4>
+          <p>Divulgação pública da violação — impacto severo na reputação da clínica.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚫</div>
+          <h4>Suspensão ou eliminação</h4>
+          <p>Bloqueio ou eliminação do banco de dados. Suspensão total das atividades de tratamento de dados.</p>
+        </div>
+      </div>
+
+      <h3>Por que clínicas de imagem são alvo prioritário?</h3>
+      <p>A Conrad trata diariamente com dados de saúde — a categoria mais sensível e protegida pela LGPD (Art. 11). Laudos, prontuários, imagens de exames, histórico médico: cada um desses é um dado sensível que, se vazado ou mal tratado, pode causar danos irreversíveis ao paciente e à clínica.</p>
+
+      <div class="box box-atencao">
+        <span class="box-icon">🎯</span>
+        <div class="box-corpo">
+          <strong>Dados de saúde = proteção máxima</strong>
+          <p>Um laudo de ressonância magnética que revele uma doença grave é um dado pessoal sensível. Um resultado de exame de sangue com marcadores oncológicos também. Todo o trabalho da Conrad envolve esse tipo de dado — por isso a conformidade com a LGPD é estratégica para a clínica.</p>
+        </div>
+      </div>
+
+      <h3>Marco Regulatório Aplicável à Conrad — Visão Geral</h3>
+      <p>A Conrad opera sob um conjunto de normas que se sobrepõem e se complementam. Conhecer o quadro completo é essencial:</p>
+
+      <div class="tabela-wrap">
+        <table>
+          <tr><th>Norma</th><th>Órgão</th><th>O que regula na Conrad</th></tr>
+          <tr><td><strong>LGPD — Lei 13.709/2018</strong></td><td>ANPD</td><td>Tratamento de dados pessoais e sensíveis de pacientes e colaboradores</td></tr>
+          <tr><td><strong>Lei 13.787/2018</strong></td><td>Congresso / CFM</td><td>Digitalização, guarda e validade legal do prontuário eletrônico</td></tr>
+          <tr><td><strong>Res. CFM 2.314/2022</strong></td><td>CFM</td><td>Telemedicina: teleconsulta, telediagnóstico, segurança de dados</td></tr>
+          <tr><td><strong>Res. CFM 2.107/2014</strong></td><td>CFM</td><td>Telerradiologia: consentimento do paciente, responsabilidade, privacidade</td></tr>
+          <tr><td><strong>Res. CFM 2.381/2024</strong></td><td>CFM</td><td>Emissão e integridade de documentos médicos eletrônicos</td></tr>
+          <tr><td><strong>Código de Ética Médica</strong></td><td>CFM</td><td>Sigilo profissional, responsabilidade individual do médico</td></tr>
+          <tr><td><strong>NGS2 / SBIS / ICP-Brasil</strong></td><td>SBIS / ITI</td><td>Nível de segurança exigido para sistemas de prontuário eletrônico</td></tr>
+          <tr><td><strong>RDC ANVISA / ANS</strong></td><td>ANVISA / ANS</td><td>Regulação de operadoras e prestadores — dados para autorização de procedimentos</td></tr>
+        </table>
+      </div>
+
+      <h3>A LGPD e o CFM — Como se complementam?</h3>
+      <p>A LGPD não substitui o Código de Ética Médica nem as resoluções do CFM. Elas se complementam: o sigilo profissional que você já pratica como profissional de saúde é um pilar da LGPD. O que a lei adiciona são obrigações formais de documentação, transparência e resposta às solicitações dos pacientes.</p>
+
+      <h3>A ANPD Está Fiscalizando — O Setor Saúde é Prioridade</h3>
+
+      <div class="box box-perigo">
+        <span class="box-icon">🚨</span>
+        <div class="box-corpo">
+          <strong>Primeira multa da ANPD (julho/2023): R$ 14.400</strong>
+          <p>A ANPD aplicou sua primeira sanção ao setor privado em julho de 2023 à empresa Telekall Infoservice, por tratar dados pessoais de 130 milhões de pessoas sem base legal. Em 2024, o Ministério da Saúde foi sancionado por expor dados de saúde de 3.030 crianças e adolescentes. <strong>O setor de saúde figura entre os alvos prioritários da ANPD para 2025.</strong></p>
+        </div>
+      </div>
+
+      <div class="box box-dica">
+        <span class="box-icon">💡</span>
+        <div class="box-corpo">
+          <strong>Regra de ouro</strong>
+          <p>Se você já pratica o sigilo médico, já está na direção certa. A LGPD exige que esse compromisso seja formalizado, documentado e ampliado para toda a equipe — não apenas para os médicos.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" disabled>← Anterior</button>
+      <span class="pagina-atual">Módulo 1 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Próximo →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       MÓDULO 2 — CONCEITOS
+       ============================== -->
+  <section class="modulo" id="modulo-1">
+    <div class="modulo-header">
+      <div class="modulo-numero">2</div>
+      <div class="modulo-titulo-wrap">
+        <h2>Conceitos Fundamentais</h2>
+        <span class="subtitulo">Os termos que você precisa conhecer e saber aplicar</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>Para aplicar a LGPD no dia a dia, é essencial dominar seus conceitos fundamentais. Veja como cada um se aplica ao contexto da Conrad:</p>
+
+      <h3>Dado Pessoal vs. Dado Sensível</h3>
+
+      <div class="tabela-wrap">
+        <table>
+          <tr>
+            <th>Tipo</th>
+            <th>Definição</th>
+            <th>Exemplos na Conrad</th>
+          </tr>
+          <tr>
+            <td><strong>Dado Pessoal</strong></td>
+            <td>Qualquer informação que identifique ou torne identificável uma pessoa</td>
+            <td>Nome do paciente, CPF, data de nascimento, telefone, endereço, e-mail, número do prontuário</td>
+          </tr>
+          <tr>
+            <td><strong>Dado Sensível</strong> ⚠️</td>
+            <td>Categorias especiais que merecem proteção reforçada (Art. 5º, II)</td>
+            <td>Laudos médicos, imagens de exames (TC, RM, US), diagnósticos, histórico clínico, medicamentos em uso, dados genéticos</td>
+          </tr>
+          <tr>
+            <td><strong>Dado de Saúde</strong> 🔴</td>
+            <td>Subconjunto do dado sensível — qualquer informação sobre condição física ou mental passada, presente ou futura</td>
+            <td>Resultado de qualquer exame realizado na Conrad — todos os exames geram dados de saúde</td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="box box-perigo">
+        <span class="box-icon">🔴</span>
+        <div class="box-corpo">
+          <strong>Todo exame realizado na Conrad gera dado de saúde</strong>
+          <p>Uma tomografia computadorizada, uma ressonância magnética, uma ultrassonografia — qualquer imagem médica é um dado de saúde sensível. Isso se aplica inclusive às imagens armazenadas no PACS e aos laudos dos radiologistas.</p>
+        </div>
+      </div>
+
+      <h3>Os Atores do Tratamento de Dados</h3>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">👤</div>
+          <h4>Titular</h4>
+          <p>A pessoa a quem os dados pertencem. Na Conrad: <strong>o paciente</strong>. Ele é o proprietário dos seus dados de saúde.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🏥</div>
+          <h4>Controlador</h4>
+          <p>Quem decide sobre o tratamento dos dados. Na Conrad: <strong>a própria Clínica Conrad</strong> é a controladora.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔧</div>
+          <h4>Operador</h4>
+          <p>Quem realiza o tratamento em nome do controlador. Exemplos: <strong>sistema de PACS, laboratório terceirizado, plano de saúde</strong>.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h4>Encarregado (DPO)</h4>
+          <p>Responsável pela adequação LGPD dentro da Conrad. Ponto de contato com pacientes e ANPD.</p>
+        </div>
+      </div>
+
+      <h3>O que é Tratamento de Dados?</h3>
+      <p>A LGPD define tratamento como <em>toda operação realizada com dados pessoais</em>. Na Conrad, tratamento acontece o tempo todo:</p>
+      <ul>
+        <li><strong>Coleta:</strong> Cadastrar o paciente na recepção</li>
+        <li><strong>Armazenamento:</strong> Guardar o laudo no sistema</li>
+        <li><strong>Uso:</strong> O médico consultar o histórico do paciente</li>
+        <li><strong>Compartilhamento:</strong> Enviar o laudo para o médico solicitante</li>
+        <li><strong>Eliminação:</strong> Descartar documentos após o prazo legal</li>
+      </ul>
+      <p>Cada uma dessas operações precisa ter uma <strong>base legal</strong> (veremos no Módulo 3) e ser realizada com o mínimo necessário de dados.</p>
+
+      <h3>Princípio da Finalidade e do Mínimo Necessário</h3>
+
+      <div class="box box-atencao">
+        <span class="box-icon">⚠️</span>
+        <div class="box-corpo">
+          <strong>Só colete o que é necessário para o atendimento</strong>
+          <p><strong>Finalidade:</strong> Os dados coletados devem ser usados somente para o propósito declarado ao paciente.<br>
+          <strong>Mínimo necessário:</strong> Colete apenas os dados essenciais para o serviço prestado. Pedir dados desnecessários é uma violação da LGPD.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Anterior</button>
+      <span class="pagina-atual">Módulo 2 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Próximo →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       MÓDULO 3 — BASES LEGAIS
+       ============================== -->
+  <section class="modulo" id="modulo-2">
+    <div class="modulo-header">
+      <div class="modulo-numero">3</div>
+      <div class="modulo-titulo-wrap">
+        <h2>Bases Legais no Contexto da Saúde</h2>
+        <span class="subtitulo">Quando e por que a Conrad pode tratar dados de saúde</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>Todo tratamento de dados pessoais precisa de uma <strong>base legal</strong> — um fundamento jurídico que autoriza aquele uso. Sem base legal, o tratamento é ilegal, mesmo que o paciente não reclame. Para dados sensíveis de saúde, as bases legais são ainda mais restritas.</p>
+
+      <h3>As Bases Legais para Dados de Saúde (Art. 11)</h3>
+
+      <div class="tabela-wrap">
+        <table>
+          <tr>
+            <th>Base Legal</th>
+            <th>Quando se aplica na Conrad</th>
+          </tr>
+          <tr>
+            <td><strong>Tutela da Saúde</strong><br><small>Art. 11, II, f</small></td>
+            <td>Realização de exames, emissão de laudos, atendimento clínico — <strong>base mais usada na Conrad</strong>. Dispensa consentimento para assistência à saúde.</td>
+          </tr>
+          <tr>
+            <td><strong>Consentimento</strong><br><small>Art. 11, I</small></td>
+            <td>Uso de imagens para fins educacionais, envio de resultados para e-mail, participação em pesquisas clínicas.</td>
+          </tr>
+          <tr>
+            <td><strong>Obrigação Legal</strong><br><small>Art. 11, II, a</small></td>
+            <td>Manutenção do prontuário (CFM exige mínimo 20 anos), comunicação à vigilância sanitária, fiscalizações da ANS.</td>
+          </tr>
+          <tr>
+            <td><strong>Proteção da Vida</strong><br><small>Art. 11, II, e</small></td>
+            <td>Situações de emergência onde o paciente não pode consentir e o tratamento é necessário para preservar a vida.</td>
+          </tr>
+          <tr>
+            <td><strong>Exercício Regular de Direitos</strong><br><small>Art. 11, II, d</small></td>
+            <td>Defesa da Conrad em processos judiciais ou administrativos envolvendo um paciente.</td>
+          </tr>
+        </table>
+      </div>
+
+      <h3>Tutela da Saúde — A Base Principal da Conrad</h3>
+      <p>Na prática, a grande maioria dos tratamentos de dados realizados pela Conrad se baseia na <strong>tutela da saúde</strong>. Isso significa que, quando um paciente vem realizar um exame, a Conrad não precisa de um consentimento específico para processar seus dados de saúde — pois isso é inerente ao serviço de assistência à saúde.</p>
+
+      <div class="box box-dica">
+        <span class="box-icon">✅</span>
+        <div class="box-corpo">
+          <strong>Tutela da saúde permite tratamento sem consentimento</strong>
+          <p>Coletar dados para realizar um exame, emitir o laudo, armazenar as imagens no PACS e enviar o resultado ao médico solicitante — tudo isso está coberto pela tutela da saúde. Não é necessário pedir consentimento do paciente para cada uma dessas operações.</p>
+        </div>
+      </div>
+
+      <h3>Quando o Consentimento é Necessário?</h3>
+      <p>O consentimento é exigido quando o uso dos dados vai além do atendimento direto ao paciente:</p>
+      <ul>
+        <li>📸 Uso de imagens ou casos clínicos em materiais educativos ou publicações</li>
+        <li>📊 Participação em pesquisa científica</li>
+        <li>📱 Envio de comunicações de marketing ou promoções</li>
+        <li>🤝 Compartilhamento com empresas parceiras para fins não clínicos</li>
+        <li>📧 Envio de resultado por e-mail quando não é o canal padrão</li>
+      </ul>
+
+      <div class="box box-atencao">
+        <span class="box-icon">⚠️</span>
+        <div class="box-corpo">
+          <strong>Consentimento deve ser específico e documentado</strong>
+          <p>Um consentimento genérico no rodapé do formulário de cadastro não é suficiente para todas as finalidades. Cada uso diferente dos dados precisa de um consentimento claro, destacado e que o paciente possa revogar a qualquer momento.</p>
+        </div>
+      </div>
+
+      <h3>Prontuário: Obrigação Legal x LGPD</h3>
+      <p>O CFM (Resolução CFM nº 1.821/2007 + Lei 13.787/2018) exige que os prontuários sejam mantidos por no mínimo <strong>20 anos</strong> a partir do último atendimento. A LGPD respeita essa obrigação legal — a Conrad pode manter os dados pelo prazo exigido pelo CFM mesmo que o paciente solicite a exclusão, pois a obrigação legal prevalece.</p>
+
+      <h3>Telerradiologia — Requisitos Específicos (Res. CFM 2.107/2014)</h3>
+      <p>A Conrad realiza ou envia exames para telediagnóstico? A Resolução CFM 2.107/2014 e a LGPD exigem, especificamente para a telerradiologia:</p>
+      <ul>
+        <li>✅ <strong>Consentimento informado do paciente</strong> para transmissão das imagens e dados a distância — obrigatório e documentado</li>
+        <li>✅ <strong>Responsabilidade do médico radiologista</strong> com CRM ativo pela integridade da transmissão e do laudo</li>
+        <li>✅ <strong>Canal seguro e criptografado</strong> para envio de imagens DICOM — nunca por canais não homologados</li>
+        <li>✅ Dados clínicos do paciente devem acompanhar as imagens, mas <strong>apenas o mínimo necessário</strong></li>
+        <li>❌ Proibido transmitir imagens sem identificação do paciente no DICOM (exceto para efeitos de anonimização para fins científicos com consentimento)</li>
+      </ul>
+
+      <h3>NGS2 — Nível de Garantia de Segurança para Prontuário Eletrônico</h3>
+      <div class="box box-atencao">
+        <span class="box-icon">🔐</span>
+        <div class="box-corpo">
+          <strong>O sistema de prontuário eletrônico da Conrad deve ser NGS2</strong>
+          <p>O CFM e a SBIS (Sociedade Brasileira de Informática em Saúde) exigem que sistemas de prontuário eletrônico atendam ao <strong>Nível de Garantia de Segurança 2 (NGS2)</strong>, que inclui: autenticação com certificado digital ICP-Brasil, controle de acesso por usuário, log de todas as ações, assinatura digital dos laudos e criptografia dos dados. O uso de sistemas não certificados expõe a Conrad a risco regulatório duplo: CFM + ANPD.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Anterior</button>
+      <span class="pagina-atual">Módulo 3 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Próximo →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       MÓDULO 4 — DIREITOS
+       ============================== -->
+  <section class="modulo" id="modulo-3">
+    <div class="modulo-header">
+      <div class="modulo-numero">4</div>
+      <div class="modulo-titulo-wrap">
+        <h2>Direitos dos Pacientes (Titulares)</h2>
+        <span class="subtitulo">O que cada paciente pode exigir da Conrad</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>A LGPD concede aos pacientes (titulares dos dados) um conjunto de direitos que a Conrad tem obrigação de respeitar e responder. Como membro do corpo clínico, você pode ser o primeiro ponto de contato quando um paciente exercer esses direitos.</p>
+
+      <h3>Os Direitos dos Titulares (Art. 18)</h3>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">🔍</div>
+          <h4>1. Confirmação e Acesso</h4>
+          <p>O paciente pode saber quais dados a Conrad possui sobre ele e ter acesso a eles.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">✏️</div>
+          <h4>2. Correção</h4>
+          <p>Dados desatualizados, imprecisos ou incompletos devem ser corrigidos mediante solicitação.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗑️</div>
+          <h4>3. Eliminação</h4>
+          <p>Solicitar a exclusão de dados desnecessários ou tratados sem base legal. (Ressalva: prontuários têm prazo legal obrigatório.)</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <h4>4. Portabilidade</h4>
+          <p>Receber seus dados em formato estruturado para transferência a outro serviço de saúde.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">ℹ️</div>
+          <h4>5. Informação sobre Compartilhamento</h4>
+          <p>Saber com quais entidades públicas ou privadas a Conrad compartilhou seus dados.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚫</div>
+          <h4>6. Revogação do Consentimento</h4>
+          <p>Retirar o consentimento dado anteriormente a qualquer momento, sem custo ou justificativa.</p>
+        </div>
+      </div>
+
+      <h3>Prazo para Resposta: 15 dias</h3>
+
+      <div class="box box-atencao">
+        <span class="box-icon">⏰</span>
+        <div class="box-corpo">
+          <strong>A Conrad tem 15 dias para responder — a partir da data da solicitação</strong>
+          <p>Se um paciente fizer uma solicitação de acesso, correção ou qualquer outro direito, a clínica tem <strong>15 dias corridos</strong> para responder (Art. 18, §3º). O atendimento é <strong>gratuito</strong> (Art. 18, §5º).</p>
+        </div>
+      </div>
+
+      <h3>O que fazer quando um paciente pedir seus dados?</h3>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>1. Não negue nem ignore</h4>
+          <p>Receba a solicitação com cordialidade. Qualquer pedido relacionado a dados pessoais é um direito do paciente.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>2. Registre a solicitação imediatamente</h4>
+          <p>Anote data, hora, nome do paciente e o que foi solicitado. Encaminhe para o Encarregado/DPO ou responsável designado.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>3. Não processe sozinho</h4>
+          <p>Não forneça cópias de prontuários ou laudos por conta própria sem seguir o fluxo estabelecido pela clínica.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>4. Acompanhe o prazo</h4>
+          <p>Lembre à equipe responsável sobre o prazo de 15 dias se necessário.</p>
+        </div>
+      </div>
+
+      <div class="box box-dica">
+        <span class="box-icon">💡</span>
+        <div class="box-corpo">
+          <strong>Exceção importante: Prontuários</strong>
+          <p>O paciente tem direito a acessar seu prontuário (isso é inclusive direito legal independente da LGPD), mas a <strong>eliminação</strong> pode ser recusada se houver obrigação legal de guarda (CFM: mínimo 20 anos). Explique isso ao paciente com clareza e encaminhe para o responsável.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Anterior</button>
+      <span class="pagina-atual">Módulo 4 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Próximo →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       MÓDULO 5 — BOAS PRÁTICAS
+       ============================== -->
+  <section class="modulo" id="modulo-4">
+    <div class="modulo-header">
+      <div class="modulo-numero">5</div>
+      <div class="modulo-titulo-wrap">
+        <h2>Boas Práticas para o Corpo Clínico</h2>
+        <span class="subtitulo">Ações concretas para proteger os dados dos nossos pacientes</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>Este módulo é o mais prático: são as atitudes do dia a dia que definem se a Conrad está ou não em conformidade com a LGPD. Cada membro do corpo clínico é um guardião dos dados dos pacientes.</p>
+
+      <h3>Prontuário Eletrônico — Acesso Mínimo Necessário</h3>
+      <ul>
+        <li>✅ Acesse apenas os prontuários dos pacientes que você está atendendo</li>
+        <li>✅ Use sempre suas próprias credenciais — nunca use login de colega</li>
+        <li>✅ Faça logout ao sair da estação de trabalho ou quando for se ausentar</li>
+        <li>❌ Não acesse prontuário por curiosidade — mesmo que seja um famoso, colega ou familiar</li>
+        <li>❌ Não deixe laudos abertos na tela quando não estiver trabalhando neles</li>
+      </ul>
+
+      <div class="box box-perigo">
+        <span class="box-icon">🚫</span>
+        <div class="box-corpo">
+          <strong>Acesso sem necessidade clínica = violação da LGPD e do Código de Ética</strong>
+          <p>Acessar o prontuário de um colega, de um familiar ou de qualquer paciente sem estar diretamente responsável pelo atendimento é uma violação tanto da LGPD quanto do Código de Ética Médica, podendo resultar em processo disciplinar no CFM e sanções administrativas da ANPD.</p>
+        </div>
+      </div>
+
+      <h3>Compartilhamento com Outros Profissionais e Planos de Saúde</h3>
+      <ul>
+        <li>✅ Compartilhe laudos e imagens com o médico solicitante — está coberto pela tutela da saúde</li>
+        <li>✅ Encaminhe para outro especialista quando necessário para o tratamento do paciente</li>
+        <li>⚠️ Para planos de saúde: compartilhe apenas o mínimo necessário para a autorização do procedimento</li>
+        <li>❌ Não envie dados completos do prontuário para planos de saúde sem necessidade específica</li>
+        <li>❌ Não compartilhe informações com farmácias, laboratórios ou outros serviços sem base legal clara</li>
+      </ul>
+
+      <h3>Fotografias e Vídeos de Pacientes</h3>
+
+      <div class="box box-perigo">
+        <span class="box-icon">📸</span>
+        <div class="box-corpo">
+          <strong>NUNCA fotografe pacientes sem consentimento escrito específico</strong>
+          <p>Fotos e vídeos de pacientes (inclusive de procedimentos) para qualquer finalidade — educação médica, apresentações, redes sociais da clínica — exigem consentimento escrito, específico e informado. O consentimento deve descrever exatamente onde e como a imagem será usada.</p>
+        </div>
+      </div>
+
+      <h3>WhatsApp e Comunicação Digital</h3>
+      <p>O WhatsApp é conveniente, mas apresenta riscos reais para dados de saúde:</p>
+      <ul>
+        <li>❌ Não envie laudos, imagens de exames ou dados clínicos por WhatsApp pessoal</li>
+        <li>❌ Não discuta casos clínicos em grupos de WhatsApp com o nome do paciente identificável</li>
+        <li>⚠️ Se necessário usar o WhatsApp Business corporativo: use apenas para contato de agendamento, jamais para resultados de exames</li>
+        <li>✅ Use os canais oficiais e seguros da Conrad (sistemas homologados, e-mail corporativo)</li>
+      </ul>
+
+      <div class="box box-atencao">
+        <span class="box-icon">📱</span>
+        <div class="box-corpo">
+          <strong>Grupos de WhatsApp de discussão clínica</strong>
+          <p>Se precisar discutir um caso em grupo de profissionais, use pseudonimização: "Paciente M.F., 45 anos, com achados de..." — nunca o nome completo. Ainda assim, prefira plataformas homologadas para discussão de casos clínicos.</p>
+        </div>
+      </div>
+
+      <h3>Política de Mesa Limpa e Tela Limpa</h3>
+      <ul>
+        <li>✅ Ao se ausentar da estação de trabalho, bloqueie a tela (Win+L ou Cmd+Ctrl+Q)</li>
+        <li>✅ Não deixe impressões de laudos ou prontuários sobre a mesa sem supervisão</li>
+        <li>✅ Documentos com dados de pacientes devem ser armazenados em local seguro</li>
+        <li>✅ Para descarte: use a fragmentadora — nunca lixo comum</li>
+      </ul>
+
+      <h3>Senhas e Credenciais de Acesso</h3>
+      <ul>
+        <li>✅ Use senhas fortes e únicas para cada sistema</li>
+        <li>✅ Nunca compartilhe suas credenciais — nem com colegas de confiança</li>
+        <li>✅ Se suspeitar que sua senha foi comprometida, troque imediatamente e avise o TI</li>
+        <li>❌ Não anote senhas em post-its, cadernos ou planilhas não criptografadas</li>
+      </ul>
+
+      <h3>Telemedicina e Telediagnóstico — Res. CFM 2.314/2022</h3>
+      <p>A Resolução CFM 2.314/2022 regulamentou definitivamente a telemedicina no Brasil. Para laudos e telediagnósticos na Conrad:</p>
+      <ul>
+        <li>✅ Use apenas plataformas homologadas e que atendam ao NGS2</li>
+        <li>✅ O registro de cada atendimento deve estar no prontuário eletrônico certificado</li>
+        <li>✅ Consentimento digital do paciente é obrigatório para teleconsultas</li>
+        <li>✅ O laudo deve ser assinado digitalmente com certificado ICP-Brasil</li>
+        <li>❌ Proibido realizar telediagnóstico por Zoom pessoal, WhatsApp, Teams pessoal ou plataformas não homologadas</li>
+      </ul>
+
+      <h3>Compartilhamento com a ANS e Planos de Saúde</h3>
+      <div class="box box-atencao">
+        <span class="box-icon">🏥</span>
+        <div class="box-corpo">
+          <strong>Planos de saúde têm acesso limitado</strong>
+          <p>A ANS (Lei 9.656/1998) autoriza a operadora a solicitar dados para autorização de procedimentos. Mas isso <strong>não significa acesso irrestrito ao prontuário</strong>. A Conrad deve fornecer apenas as informações mínimas necessárias para a autorização. Dados adicionais (histórico completo, informações que o paciente não autorizou compartilhar) não podem ser enviados sem base legal específica ou consentimento do paciente.</p>
+        </div>
+      </div>
+
+      <div class="box box-dica">
+        <span class="box-icon">💡</span>
+        <div class="box-corpo">
+          <strong>Dica prática: Política de Mesa Limpa e Tela Limpa</strong>
+          <p>Ao encerrar o expediente ou sair da estação: (1) feche todos os sistemas com dados de pacientes, (2) retire impressões da mesa e arquive ou fragmente, (3) bloqueie o computador — Win+L ou Cmd+Ctrl+Q. Isso vale para recepção, sala de exames, consultório e escritório administrativo.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Anterior</button>
+      <span class="pagina-atual">Módulo 5 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Próximo →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       MÓDULO 6 — CASOS REAIS
+       ============================== -->
+  <section class="modulo" id="modulo-5">
+    <div class="modulo-header">
+      <div class="modulo-numero">6</div>
+      <div class="modulo-titulo-wrap">
+        <h2>O que NÃO Fazer — Casos Reais</h2>
+        <span class="subtitulo">Violações reais, penalidades aplicadas e responsabilidade individual</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <p>Aprender com os erros alheios é mais barato do que aprender com os próprios. Veja casos reais de violações de dados na área da saúde e as consequências enfrentadas.</p>
+
+      <h3>Casos de Violação na Área da Saúde no Brasil</h3>
+
+      <div class="box box-perigo">
+        <span class="box-icon">📋</span>
+        <div class="box-corpo">
+          <strong>Caso 1: Médico posta foto de paciente sem consentimento</strong>
+          <p>Um médico fotografou um resultado de exame de um paciente público e compartilhou no Instagram para fins educativos. O paciente não havia dado consentimento. A clínica recebeu notificação da ANPD, o médico respondeu processo no CFM e a publicação viralizou negativamente nas redes sociais. <strong>Impacto: reputacional + disciplinar + multa.</strong></p>
+        </div>
+      </div>
+
+      <div class="box box-perigo">
+        <span class="box-icon">📋</span>
+        <div class="box-corpo">
+          <strong>Caso 2: Grupo de WhatsApp com dados de pacientes</strong>
+          <p>Uma equipe criou um grupo de WhatsApp para agilizar discussões clínicas. Mensagens com nomes, diagnósticos e imagens de exames eram enviadas livremente. Um integrante saiu da equipe e o celular foi roubado. Os dados de dezenas de pacientes foram expostos. <strong>Impacto: notificação obrigatória à ANPD + possível multa.</strong></p>
+        </div>
+      </div>
+
+      <div class="box box-perigo">
+        <span class="box-icon">📋</span>
+        <div class="box-corpo">
+          <strong>Caso 3: Acesso indevido a prontuário de pessoa pública</strong>
+          <p>Uma funcionária acessou o prontuário de uma paciente famosa por curiosidade. Os dados foram vazados para a imprensa. A funcionária foi demitida por justa causa, a clínica pagou indenização por danos morais e sofreu investigação da ANPD. <strong>Impacto: demissão + processo trabalhista + indenização civil.</strong></p>
+        </div>
+      </div>
+
+      <div class="box box-perigo">
+        <span class="box-icon">📋</span>
+        <div class="box-corpo">
+          <strong>Caso 4: E-mail enviado para destinatário errado</strong>
+          <p>Uma recepcionista enviou o laudo de exame para o e-mail errado — confundiu dois pacientes com nomes parecidos. O destinatário errado recebeu informações sobre diagnóstico oncológico de outra pessoa. <strong>Impacto: incidente de segurança que exige notificação + indenização potencial.</strong></p>
+        </div>
+      </div>
+
+      <h3>Penalidades da ANPD — O que já foi aplicado no Brasil</h3>
+      <p>A ANPD iniciou suas primeiras sanções em 2023. Embora ainda em fase de consolidação, multas já foram aplicadas a empresas de telemarketing, plataformas digitais e operadoras de saúde por:</p>
+      <ul>
+        <li>Ausência de base legal para tratamento de dados</li>
+        <li>Falta de consentimento em situações que o exigem</li>
+        <li>Descumprimento de solicitações de titulares (não resposta em 15 dias)</li>
+        <li>Vazamentos de dados sem notificação adequada à ANPD</li>
+        <li>Ausência de medidas de segurança adequadas</li>
+      </ul>
+
+      <h3>Responsabilidade Individual do Profissional de Saúde</h3>
+
+      <div class="box box-atencao">
+        <span class="box-icon">⚖️</span>
+        <div class="box-corpo">
+          <strong>A responsabilidade é sua também — não apenas da clínica</strong>
+          <p>Quando um profissional viola a LGPD por ação própria (acesso indevido, compartilhamento não autorizado, uso irregular de dados), <strong>ele pode responder pessoalmente</strong>:</p>
+          <p>• <strong>CFM:</strong> Processo ético-disciplinar, suspensão ou cassação do CRM<br>
+          • <strong>Civil:</strong> Indenização por danos morais ao paciente<br>
+          • <strong>Penal:</strong> A LGPD prevê crimes específicos (divulgação indevida de dados, acesso não autorizado — Art. 154-A do Código Penal)<br>
+          • <strong>Trabalhista:</strong> Demissão por justa causa</p>
+        </div>
+      </div>
+
+      <h3>O que fazer se identificar uma violação?</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>1. Não esconda — comunique imediatamente</h4>
+          <p>Se você identificou um vazamento, acesso indevido ou envio incorreto de dados, comunique ao Encarregado/DPO ou à sua liderança imediatamente. Ocultar um incidente agrava a situação legal.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>2. Preserve evidências</h4>
+          <p>Não delete e-mails, logs ou qualquer registro do incidente. A investigação depende dessas evidências.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>3. Documente o ocorrido</h4>
+          <p>Registre: o que aconteceu, quando, quais dados podem ter sido afetados e quantas pessoas estão envolvidas.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>4. Aguarde orientação do responsável</h4>
+          <p>A notificação à ANPD deve ser feita em 72 horas para incidentes graves. Quem decide e conduz esse processo é o Encarregado/DPO, não o colaborador individualmente.</p>
+        </div>
+      </div>
+
+      <div class="box box-dica">
+        <span class="box-icon">🛡️</span>
+        <div class="box-corpo">
+          <strong>A melhor defesa é a prevenção</strong>
+          <p>A maioria dos incidentes de dados na saúde ocorre por descuido — não por má intenção. Seguir as boas práticas do Módulo 5 e comunicar rapidamente qualquer irregularidade são os pilares da sua proteção individual e da Conrad.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Anterior</button>
+      <span class="pagina-atual">Módulo 6 de 6</span>
+      <button class="btn-nav primario" onclick="avancar()">Ir para o Quiz →</button>
+    </div>
+  </section>
+
+  <!-- ==============================
+       QUIZ CTA
+       ============================== -->
+  <section class="modulo" id="modulo-6">
+    <div class="modulo-header">
+      <div class="modulo-numero">✅</div>
+      <div class="modulo-titulo-wrap">
+        <h2>Parabéns! Você concluiu todos os módulos.</h2>
+        <span class="subtitulo">Agora é hora de testar o seu conhecimento</span>
+      </div>
+    </div>
+    <div class="conteudo">
+
+      <div class="box box-dica">
+        <span class="box-icon">🏆</span>
+        <div class="box-corpo">
+          <strong>Você está pronto para o Quiz!</strong>
+          <p>São <strong>10 questões de múltipla escolha</strong> sobre os conteúdos dos 6 módulos. Você precisa de pelo menos <strong>7 acertos (70%)</strong> para ser aprovado e receber seu certificado.</p>
+          <p>Você pode refazer o quiz quantas vezes precisar.</p>
+        </div>
+      </div>
+
+      <div class="quiz-cta">
+        <h3>📝 Fazer o Quiz Agora</h3>
+        <p>O quiz abre em uma nova aba. Após enviar as respostas, você receberá um e-mail automático com seu resultado — e o certificado em PDF se for aprovado.</p>
+        <!-- ⚠️ Substitua o link abaixo pela URL do seu Google Forms -->
+        <a href="COLE_AQUI_O_LINK_DO_GOOGLE_FORMS" target="_blank" class="btn-quiz">
+          Iniciar Quiz de Avaliação
+        </a>
+        <p class="quiz-nota">⏱️ Tempo estimado: 10 a 15 minutos • 📧 Resultado enviado por e-mail</p>
+      </div>
+
+      <div class="box box-atencao" style="margin-top: 28px;">
+        <span class="box-icon">📧</span>
+        <div class="box-corpo">
+          <strong>Atenção: preencha seu e-mail corretamente no quiz</strong>
+          <p>O certificado será enviado automaticamente para o e-mail que você informar no questionário. Verifique o spam caso não receba em até 5 minutos após a conclusão.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="nav-inferior">
+      <button class="btn-nav" onclick="voltar()">← Rever Módulos</button>
+      <span class="pagina-atual">Concluído!</span>
+      <span></span>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>
+    <strong>Conrad Diagnóstico por Imagem</strong> — Treinamento Interno de LGPD<br>
+    Lei nº 13.709/2018 • Conteúdo para uso exclusivo dos colaboradores da Conrad<br>
+    Dúvidas: fale com o Encarregado de Dados (DPO) da clínica
+  </p>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT — NAVEGAÇÃO E PROGRESSO
+     ============================================================ -->
+<script>
+  const TOTAL = 7; // 6 módulos + quiz
+  let atual = 0;
+  const concluidos = new Set();
+
+  function irPara(index) {
+    // Marcar módulo atual como concluído antes de navegar
+    if (atual < 6) concluidos.add(atual);
+
+    document.getElementById(`modulo-${atual}`).classList.remove('ativo');
+    document.querySelectorAll('.nav-btn')[atual].classList.remove('ativo');
+
+    atual = index;
+
+    document.getElementById(`modulo-${atual}`).classList.add('ativo');
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns[atual].classList.add('ativo');
+
+    // Marcar botões de módulos concluídos
+    concluidos.forEach(i => navBtns[i].classList.add('concluido'));
+
+    // Atualizar barra de progresso
+    const progresso = Math.round(((concluidos.size) / (TOTAL - 1)) * 100);
+    document.getElementById('progressBar').style.width = progresso + '%';
+
+    // Scroll ao topo do container
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function avancar() {
+    if (atual < TOTAL - 1) irPara(atual + 1);
+  }
+
+  function voltar() {
+    if (atual > 0) irPara(atual - 1);
+  }
+
+  // Marcar módulo 0 como visitado ao iniciar
+  document.querySelectorAll('.nav-btn')[0].classList.add('ativo');
+</script>
+
+</body>
+</html>
